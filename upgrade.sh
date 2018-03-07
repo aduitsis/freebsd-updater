@@ -20,6 +20,13 @@ if [ ! "$previous_version" ]; then
 	previous_version=$UNAME
 fi
 
+prv_str=$(echo $previous_version | cut -d'-' -f1 | tr '.' '_')
+new_str=$(echo $NEW | cut -d'-' -f1 | tr '.' '_')
+if [ "$prv_str" == "$new_str" ]; then
+	dialog --ascii-lines --msgbox "$(hostname) is already $NEW. Exiting" 0 0
+	exit
+fi
+
 if [ ! "$phase_pkg_upgrade" ]; then
 	$DIALOG "pkg upgrade this system?" 0 0
 	if [ $? -eq 0 ]; then
@@ -136,7 +143,6 @@ if [ ! "$phase_reboot3" ]; then
 	$SYSRC phase_reboot3=1
 fi
 
-prv_str=$(echo $previous_version | cut -d'-' -f1 | tr '.' '_')
 if [ ! "$phase_reactivate_jails" ]; then
 	$DIALOG "reactivate jails with old basejail from $previous_version ?" 0 0
 	if [ $? -eq 0 ]; then
