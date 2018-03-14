@@ -69,6 +69,7 @@ if [ ! "$new_version" ]; then
 	dialog --ascii-lines --inputbox "version to upgrade to?" 0 0 $NEW 2> $TMP
 	NEW=$(cat $TMP)
 	clear
+	new_version=$NEW
 	$SYSRC new_version=$NEW
 fi
 
@@ -110,6 +111,20 @@ if [ ! "$phase_reboot2" ]; then
 	$SYSRC phase_reboot2=1
 fi
 
+if [ ! "$phase_reactivate_jails" ]; then
+	$DIALOG "reactivate jails with old basejail from $previous_version ?" 0 0
+	if [ $? -eq 0 ]; then
+		echo $prv_str
+		for j in $(ls /usr/local/etc/ezjail | egrep -v 'norun$'); do
+			sed -i -E "s/^\/var\/jails\/basejail/\/var\/jails\/old_basejail_$prv_str/" /etc/fstab.$j
+		done
+		test -d /var/jails/basejail && mv /var/jails/basejail /var/jails/old_basejail_$prv_str
+		test -d /var/jails/newjail && mv /var/jails/newjail /var/jails/old_newjail_$prv_str
+		sysrc ezjail_enable=YES
+		service ezjail start
+		$SYSRC phase_reactivate_jails=1
+	fi
+fi
 
 if [ ! "$phase_install_after1" ]; then
 	$DIALOG "run a freebsd-update install?" 0 0
@@ -143,20 +158,6 @@ if [ ! "$phase_reboot3" ]; then
 	$SYSRC phase_reboot3=1
 fi
 
-if [ ! "$phase_reactivate_jails" ]; then
-	$DIALOG "reactivate jails with old basejail from $previous_version ?" 0 0
-	if [ $? -eq 0 ]; then
-		echo $prv_str
-		for j in $(ls /usr/local/etc/ezjail | egrep -v '_norun$'); do
-			sed -i -E "s/^\/var\/jails\/basejail/\/var\/jails\/old_basejail_$prv_str/" /etc/fstab.$j
-		done
-		test -d /var/jails/basejail && mv /var/jails/basejail /var/jails/old_basejail_$prv_str
-		test -d /var/jails/newjail && mv /var/jails/newjail /var/jails/old_newjail_$prv_str
-		sysrc ezjail_enable=YES
-		service ezjail start
-		$SYSRC phase_reactivate_jails=1
-	fi
-fi
 
 if [ ! "$phase_create_basejail" ]; then
 	$DIALOG "create ($(uname -r)) basejail?" 0 0
