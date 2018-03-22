@@ -168,7 +168,7 @@ if [ ! "$phase_create_basejail" ]; then
 fi
 
 
-JAILS=$(ezjail-admin list | tail +3 | awk '{print $4}')
+JAILS=$(ezjail-admin list | tail +3 | egrep ^DR | awk '{print $4}')
 
 for j in $JAILS; do
 	jail_ver=$(ezjail-admin console -e 'freebsd-version' $j)
@@ -188,7 +188,7 @@ for j in $JAILS; do
 				ezjail-admin start $j
 				ezjail-admin console -e 'freebsd-version' $j
 				ezjail-admin console -e "sed -i -E s/^IGNORE/IIGNORE/ /etc/mergemaster.rc" $j
-				ezjail-admin console -e 'mergemaster -p' $j
+				ezjail-admin console -e 'mergemaster --run-updates=always -p' $j
 				ezjail-admin console -e "sed -i -E s/^IIGNORE/IGNORE/ /etc/mergemaster.rc" $j
 				ezjail-admin console -e 'mergemaster -iU --run-updates=always' $j
 				ezjail-admin console -e 'pkg-static install -f pkg' $j
