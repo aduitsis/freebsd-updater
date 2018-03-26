@@ -11,7 +11,7 @@ $SYSRC last_run=$DATE
 UNAME=$(uname -r)
 TMP=/tmp/var.out
 
-NEW="11.1-RELEASE"
+NEW="10.4-RELEASE"
 
 DIALOG="dialog --ascii-lines --yesno "
 
@@ -22,6 +22,10 @@ fi
 
 prv_str=$(echo $previous_version | cut -d'-' -f1 | tr '.' '_')
 new_str=$(echo $NEW | cut -d'-' -f1 | tr '.' '_')
+prv_major=$(echo $previous_version | cut -d'.' -f1)
+new_major=$(echo $NEW | cut -d'.' -f1)
+
+
 if [ "$prv_str" == "$new_str" ]; then
 	dialog --ascii-lines --msgbox "$(hostname) is already $NEW. Exiting" 0 0
 	exit
@@ -170,6 +174,10 @@ fi
 
 JAILS=$(ezjail-admin list | tail +3 | egrep ^DR | awk '{print $4}')
 
+if [ $prv_major == $new_major ]; then
+	additional_msg='(no mergemaster or pkg upgrade necessary)'
+fi
+
 for j in $JAILS; do
 	jail_ver=$(ezjail-admin console -e 'freebsd-version' $j)
 	if [ "$jail_ver" != "$UNAME" ]; then
@@ -180,19 +188,21 @@ for j in $JAILS; do
 		phase_var_value=$(eval echo $phase_var_name)
 		#echo $phase_var_value
 		if [ ! "$phase_var_value" ]; then
-			$DIALOG "update jail $j ?" 0 0
+			$DIALOG "update jail $j ? $additional_msg " 0 0
 			if [ $? -eq 0 ]; then
 				jname=$(echo $j | tr '.' '_')
 				ezjail-admin stop $j
 				sed -i -E "s/^\/var\/jails\/old_basejail_$prv_str/\/var\/jails\/basejail/" /etc/fstab.$jname
 				ezjail-admin start $j
 				ezjail-admin console -e 'freebsd-version' $j
-				ezjail-admin console -e "sed -i -E s/^IGNORE/IIGNORE/ /etc/mergemaster.rc" $j
-				ezjail-admin console -e 'mergemaster --run-updates=always -p' $j
-				ezjail-admin console -e "sed -i -E s/^IIGNORE/IGNORE/ /etc/mergemaster.rc" $j
-				ezjail-admin console -e 'mergemaster -iU --run-updates=always' $j
-				ezjail-admin console -e 'pkg-static install -f pkg' $j
-				ezjail-admin console -e 'pkg upgrade' $j
+				if [ $prv_major != $new_major ]; then
+					ezjail-admin console -e "sed -i -E s/^IGNORE/IIGNORE/ /etc/mergemaster.rc" $j
+					ezjail-admin console -e 'mergemaster --run-updates=always -p' $j
+					ezjail-admin console -e "sed -i -E s/^IIGNORE/IGNORE/ /etc/mergemaster.rc" $j
+					ezjail-admin console -e 'mergemaster -iU --run-updates=always' $j
+					ezjail-admin console -e 'pkg-static install -f pkg' $j
+					ezjail-admin console -e 'pkg upgrade' $j
+				fi
 				$SYSRC $phase_var=1
 			fi
 		fi
