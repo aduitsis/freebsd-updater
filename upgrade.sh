@@ -180,8 +180,9 @@ fi
 
 for j in $JAILS; do
 	jail_ver=$(ezjail-admin console -e 'freebsd-version' $j)
+	echo comparing $jail_ver with $UNAME
 	if [ "$jail_ver" != "$UNAME" ]; then
-		phase_var=$(echo phase_update_jail_$j | tr '.' '_')
+		phase_var=$(echo phase_update_jail_$j | tr '.' '_' | tr '-' '_' )
 		#echo $phase_var
 		phase_var_name="\$$phase_var"
 		#echo $phase_var_name
@@ -190,7 +191,7 @@ for j in $JAILS; do
 		if [ ! "$phase_var_value" ]; then
 			$DIALOG "update jail $j ? $additional_msg " 0 0
 			if [ $? -eq 0 ]; then
-				jname=$(echo $j | tr '.' '_')
+				jname=$(echo $j | tr '.' '_' | tr '-' '_' )
 				ezjail-admin stop $j
 				sed -i -E "s/^\/var\/jails\/old_basejail_$prv_str/\/var\/jails\/basejail/" /etc/fstab.$jname
 				ezjail-admin start $j
