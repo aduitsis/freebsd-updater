@@ -134,6 +134,15 @@ if [ ! "$phase_install_after1" ]; then
 	fi
 fi
 
+if [ ! "$phase_recreate_passwd" ]; then
+	$DIALOG "re-create passwd database? (this is sometimes needed after an upgrade)"
+	if [ $? -eq 0 ]; then
+		/usr/sbin/pwd_mkdb -p /etc/master.passwd
+	fi
+	clear
+	$SYSRC phase_recreate_passwd=1
+fi
+
 if [ ! "$phase_pkg_upgrade_after_reboot" ]; then
 	$DIALOG "pkg upgrade this system?" 0 0
 	if [ $? -eq 0 ]; then
