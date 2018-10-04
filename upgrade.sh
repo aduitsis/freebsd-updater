@@ -139,7 +139,7 @@ if [ ! "$phase_install_after1" ]; then
 fi
 
 if [ ! "$phase_recreate_passwd" ]; then
-	$DIALOG "re-create passwd database? (this is sometimes needed after an upgrade)"
+	$DIALOG "re-create passwd database? (this is sometimes needed after an upgrade)" 0 0
 	if [ $? -eq 0 ]; then
 		/usr/sbin/pwd_mkdb -p /etc/master.passwd
 	fi
