@@ -205,6 +205,7 @@ for j in $JAILS; do
 				sed -i -E "s/^\/var\/jails\/old_basejail_$prv_str/\/var\/jails\/basejail/" /etc/fstab.$jname
 				ezjail-admin start $j
 				ezjail-admin console -e 'freebsd-version' $j
+				ezjail-admin console -e '/usr/sbin/pwd_mkdb -p /etc/master.passwd' $j
 				if [ $prv_major != $new_major ]; then
 					ezjail-admin console -e "sed -i -E s/^IGNORE/IIGNORE/ /etc/mergemaster.rc" $j
 					ezjail-admin console -e 'mergemaster --run-updates=always -p' $j
