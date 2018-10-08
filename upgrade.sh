@@ -175,7 +175,7 @@ fi
 if [ ! "$phase_create_basejail" ]; then
 	$DIALOG "create ($(uname -r)) basejail?" 0 0
 	if [ $? -eq 0 ]; then
-		ezjail-admin install
+		ezjail-admin install -s
 		$SYSRC phase_create_basejail=1
 	fi
 fi
