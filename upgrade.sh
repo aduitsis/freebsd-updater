@@ -42,9 +42,9 @@ if [ ! "$phase_pkg_upgrade" ]; then
 fi
 
 if [ ! "$phase_puppet4" ]; then
-	$DIALOG "install puppet4?" 0 0
+	$DIALOG "install puppet5?" 0 0
 	if [ $? -eq 0 ]; then
-		pkg install -y puppet4
+		pkg install -y puppet5
 	fi
 	clear
 	$SYSRC phase_puppet4=1
