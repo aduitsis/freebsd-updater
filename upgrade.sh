@@ -11,7 +11,7 @@ $SYSRC last_run=$DATE
 UNAME=$(uname -r)
 TMP=/tmp/var.out
 
-NEW="11.2-RELEASE"
+NEW="11.3-RELEASE"
 
 DIALOG="dialog --ascii-lines --yesno "
 
